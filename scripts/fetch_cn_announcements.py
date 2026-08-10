@@ -91,6 +91,10 @@ def fetch_cninfo_announcements(stock_code="", keyword="", page_size=5, days_filt
                     clean_title = raw_title.replace("<em>", "").replace("</em>", "").strip()
                     adj_path = a.get("adjunctUrl")
                     
+                    # Strict stock code check: if stock_code is provided, drop non-matching announcements
+                    if stock_code and sec_code and str(sec_code).strip() != str(stock_code).strip():
+                        continue
+
                     pdf_url = f"http://static.cninfo.com.cn/{adj_path}" if adj_path else ""
                     time_stamp = a.get("announcementTime")
                     pub_date = ""
