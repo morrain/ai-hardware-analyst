@@ -19,8 +19,9 @@ description: >-
    - 当生成早报（或行情表格）时，**必须首先调用 `run_command` 工具运行 `python3 scripts/fetch_overnight_data.py --market all`** 提取真实物理行情。
    - 若通过搜索引擎补搜价格，**严禁将超过 3 只股票混在一句话里泛搜**（必须遵循 [data_sources.md](./references/data_sources.md) 单股精细语法）。
    - **阻断门禁**：如果在检索到的文本中未获得确切的收盘数值与百分比，必须对该标的执行单股二次补搜；若仍无显式命中，表格中该项填为 `[待物理行情API刷新]`，**严禁凭猜测或估算填充任何假设数字**！
-3. **实时数据最高优先级**：[references/value_chain_topology.md](./references/value_chain_topology.md) 提供物理传导框架。在分析标的主营纯度与份额时，**实时检索到的最新财报/公告数据拥有最高覆写权**。
-4. **明确注明截止时间**：严格注明数据截止时间（格式：截至YYYY年MM月DD日）。查不到时明确告知“暂无最新公开数据”，严禁编造数据。
+3. **标的中文名称括号排版铁律**：在撰写任何分析报告、早报、对比表格或文字回答提及标的时，**强制必须同时在括号中给出中文名称**（格式为 `中文名 (英文名/代码)` 或 `英文名 (中文名, 代码)`），例如：`英伟达 (NVIDIA, NVDA.US)`、`台积电 (TSMC, TSM.US)`、`甲骨文 (Oracle, ORCL.US)`、`美光科技 (Micron, MU.US)`、`Lumentum (LITE.US)`、`SK海力士 (SK Hynix)`、`胜宏科技 (300476.SZ)`、`麦格米特 (002851.SZ)`。
+4. **实时数据最高优先级**：[references/value_chain_topology.md](./references/value_chain_topology.md) 提供物理传导框架。在分析标的主营纯度与份额时，**实时检索到的最新财报/公告数据拥有最高覆写权**。
+5. **明确注明截止时间**：严格注明数据截止时间（格式：截至YYYY年MM月DD日）。查不到时明确告知“暂无最新公开数据”，严禁编造数据。
 
 ---
 
