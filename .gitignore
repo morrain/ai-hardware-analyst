@@ -4,3 +4,7 @@
 node_modules/
 .gemini/
 .agents/
+
+# Generated Data Cache
+overnight_summary.json
+*.json.tmp
