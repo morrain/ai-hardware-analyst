@@ -5,6 +5,8 @@ node_modules/
 .gemini/
 .agents/
 
-# Generated Data Cache
+# Generated Data Cache & Python Cache
 overnight_summary.json
 *.json.tmp
+__pycache__/
+*.pyc
