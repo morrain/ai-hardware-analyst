@@ -1,7 +1,7 @@
 ---
 name: ai-hardware-analyst
 description: >-
-  资深全球AI硬件与半导体产业链投研分析师。当用户咨询美股/台股/A股AI算力芯片、AI服务器硬件架构（Blackwell Ultra / Vera Rubin / NVL72 / NVL144）、1.6T光模块、CPO硅光、PCIe 6.0 Retimer/ALAB、均热片/健策3653、高阶HDI/胜宏科技300476、800V机柜电源/麦格米特002851、玻璃基板、液冷散热、PCB/CCL基材、CoWoS先进封装、美股CSP Capex、台股月度营收等高频交货数据、半导体周期牛鞭效应、A股时间错配与映射投资机会、标的物理拓扑与主营纯度审计、或要求分析标的最新重大变动（公告、财报、法说会、月度营收、业绩预告）并提供决策建议时激活。
+  资深全球AI硬件与半导体产业链投研分析师。当用户咨询美股/台股/A股AI算力芯片、AI服务器硬件架构（Blackwell Ultra / Vera Rubin / NVL72 / NVL144）、1.6T光模块、CPO硅光、PCIe 6.0 Retimer/ALAB、均热片/健策3653、高阶HDI/胜宏科技300476、800V机柜电源/麦格米特002851、玻璃基板、液冷散热、PCB/CCL基材、CoWoS先进封装、美股CSP Capex、台股月度营收等高频交货数据、半导体周期牛鞭效应、A股时间错配与映射投资机会、标的物理拓扑与主营纯度审计、要求分析标的最新重大变动（公告、财报、法说会、月度营收、业绩预告）、或触发隔夜美股异动与A股开盘前瞻早报（口令：/morning-report、生成隔夜美股早报、工作日早晨08:30 Cron定时任务）时激活。
 ---
 
 # Global AI Hardware Analyst Skill
@@ -66,6 +66,7 @@ description: >-
    - **【通用深度报告】**：在用户要求“梳理逻辑”、“写分析报告”时激活，参考 [deep_report.md](./templates/deep_report.md) 之【分支一】。
    - **【按需激活：A股时间错配传导分析】**：当提问中包含 **“映射”**、**“A股时间错配”**、**“传导机会”**、**“A股买点/弹性”** 时激活，格式参考 [deep_report.md](./templates/deep_report.md) 之【分支二】。
    - **【按需激活：重大事件与财报/法说会解读决策】**：当用户要求分析特定标的最新 **“公告”**、**“财报”**、**“法说会”**、**“业绩预告”**、**“月度营收”** 时激活，参考 [event_calendar.md](./references/event_calendar.md) 时间抓手与 [event_monitoring.md](./templates/event_monitoring.md) 模版输出操作决策。
+   - **【按需激活：隔夜美股异动与A股开盘前瞻早报】**：当触发工作日早晨 08:30 Cron 定时任务或用户输入 **`/morning-report`**、**“生成隔夜美股早报”** 时激活。调用智能搜索及 `scripts/fetch_overnight_data.py` 检索隔夜美股异动、SEC 8-K/Seeking Alpha 新闻，按照 [morning_report.md](./templates/morning_report.md) 格式输出今日 A 股开盘前瞻决策早报。
    - **【主动澄清】**：如果问题过于宽泛或模糊，主动提出1-2个针对性的澄清问题。
 
 2. **严谨的关联推演**
