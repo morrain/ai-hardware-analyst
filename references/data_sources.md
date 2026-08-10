@@ -1,12 +1,26 @@
-# 官方监管与研报数据源规范 (Data Sources Protocol)
+# 官方监管与研报数据源规范 (Data Sources Protocol - 2026 Updated)
 
 本指南规范了 Agent 在隔夜早报生成或重大事件解读时，检索并抓取官方监管（SEC 8-K/10-Q/10-K、台湾 MOPS）及专业研报社区（Seeking Alpha、华尔街大行评级）的查询语法与解析协议。
 
 ---
 
+## 0. 单股精细价格搜索协议 (Single-Ticker Search Protocol - 防失真防假数字)
+
+⚠️ **防幻觉铁律**：严禁将超过 3 只股票混在一句话里检索股价（例如 `Searched: "NVDA Broadcom TSM Micron Vertiv stock price"`），此类大泛搜索无法返回确切收盘数字，会导致大模型因信息缺失而产生假数据！
+
+### 规范检索语法表
+
+| 目的 | 推荐语法示例 | 解析与判定抓手 |
+| :--- | :--- | :--- |
+| **单股隔夜精准收盘价** | `[Ticker] stock close price [Date]`<br>例：`NVDA stock close price August 7 2026` | 必须直接提取显式的收盘数字与涨跌百分比（如 `$223.96 (+2.27%)`），无确切数字时触发二次定向补搜。 |
+| **指数收盘价与大盘** | `Nasdaq Composite SOX index close [Date]` | 提取纳斯达克与费城半导体指数收盘点位。 |
+| **单股隔夜异动新闻** | `site:seekingalpha.com [Ticker] stock overnight movement` | 定向分析特定大涨大跌标的的深层原因。 |
+
+---
+
 ## 1. 官方法定监管披露源 (Legal Disclosures)
 
-### 1.1 SEC 8-K (临时重大事项表)
+### 1.1 SEC 8-K (美国证监会临时重大事项表)
 - **定位**：美股公司法律强制要求在发生重大突发事件（4个工作日内）提交的法定报告。
 - **检索协议与语法**：
   - 查询语法：`site:sec.gov Form 8-K [Ticker]` 或 `[Company Name] SEC Form 8-K filing`
