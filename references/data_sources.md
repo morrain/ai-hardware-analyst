@@ -62,9 +62,14 @@
 
 ---
 
-## 4. 全量数据源权威原始出处与直达链接对照表 (Authoritative Direct URLs)
+## 4. 全量数据源权威原始出处与直达链接范例 (Authoritative Portal Patterns)
 
-| 数据源类型 | 机构 / 平台名称 | 原始出处直达 URL 链接 | 数据权威度与解析用途 |
+> ⚠️ **动态防幻觉溯源铁律 (Dynamic Citation Protocol)**：
+> 1. 本表中的 URL 仅作为通用检索入口模版（Portal Pattern）。
+> 2. **真实引用必须取自 `search_web` 实时返回的真实 URL**：Agent 在报告或早报中引用任何 SEC 公告、Seeking Alpha 研报、台股营收或大行评级时，**必须强制在文中附带该次检索动态获取到的真实原网页 URL 链接 (Citations)**。
+> 3. **严禁凭空伪造/拼凑 URL**：引用的 URL 必须 100% 来自于搜索引擎真实返回的字段，严禁猜测或臆造无法访问的假 HTML 文件路径！若检索摘要未暴露完整子页面 URL，统一标注 `[来源: 官方披露/公开检索]`。
+
+| 数据源类型 | 机构 / 平台名称 | 入口 Portal 范例 URL 链接 | 数据权威度与解析用途 |
 | :--- | :--- | :--- | :--- |
 | **美股物理行情 API** | 新浪财经美股网关 | `http://hq.sinajs.cn/list=gb_nvda,gb_tsm,gb_mu,gb_lite` | 毫秒级批量物理价格，用于早报表单零 null 填充 |
 | **美股大盘行情** | Yahoo Finance 专栏 | [Yahoo Finance NVDA](https://finance.yahoo.com/quote/NVDA)<br>[Yahoo Finance TSM](https://finance.yahoo.com/quote/TSM) | 官方个股收盘与盘后行情页面 |
@@ -72,4 +77,5 @@
 | **深度买卖方研报** | Seeking Alpha 专栏 | [Seeking Alpha NVDA Analysis](https://seekingalpha.com/symbol/NVDA/analysis)<br>[Seeking Alpha NVDA Earnings](https://seekingalpha.com/symbol/NVDA/earnings) | 机构买卖方深度逻辑与 Q2/Q3 业绩指引观点拆解 |
 | **华尔街大行评级** | TipRanks / MarketWatch | [MarketWatch NVDA Analyst Estimates](https://www.marketwatch.com/investing/stock/nvda/analystestimates)<br>[TipRanks NVDA Forecast](https://www.tipranks.com/stocks/nvda/forecast) | 高盛、大摩、美银等大行目标价与评级一致性预期 |
 | **台湾官方高频营收** | 台湾公开资讯观测站 (MOPS) | [MOPS 官方首页](https://mops.twse.com.tw/)<br>[MOPS IFRS 营基月报](https://mops.twse.com.tw/mops/web/t05st10_ifrs) | 台股鸿海(2317)、广达(2382)、健策(3653)月度合并营收官方原抓手 |
+
 
