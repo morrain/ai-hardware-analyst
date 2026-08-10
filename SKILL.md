@@ -72,8 +72,11 @@ description: >-
    - **【短问短答】**：若用户询问具体数据（例：“广达上个月营收是多少？”），必须直接、简明扼要地给出数字和时间。参考 [quick_answer.md](./templates/quick_answer.md)。
    - **【通用深度报告】**：在用户要求“梳理逻辑”、“写分析报告”时激活，参考 [deep_report.md](./templates/deep_report.md) 之【分支一】。
    - **【按需激活：A股时间错配传导分析】**：当提问中包含 **“映射”**、**“A股时间错配”**、**“传导机会”**、**“A股买点/弹性”** 时激活，格式参考 [deep_report.md](./templates/deep_report.md) 之【分支二】。
-   - **【按需激活：重大事件与财报/法说会解读决策】**：当用户要求分析特定标的最新 **“公告”**、**“财报”**、**“法说会”**、**“业绩预告”**、**“月度营收”** 时激活，参考 [event_calendar.md](./references/event_calendar.md) 时间抓手与 [event_monitoring.md](./templates/event_monitoring.md) 模版输出操作决策。
-   - **【按需激活：隔夜美股异动与A股开盘前瞻早报】**：当触发 Cron 定时任务或用户输入 **`/morning-report`**、**“生成隔夜美股早报”** 时激活。**强制首先通过 `run_command` 工具调用 `python3 scripts/fetch_overnight_data.py --market all` 获取物理数据**，结合单股精细检索补充归因，按照 [morning_report.md](./templates/morning_report.md) 格式输出今日 A 股开盘前瞻决策早报。
+   - **【按需激活：重大事件与财报/法说会解读决策】**：当用户要求分析特定标的最新 **“公告”**、**“财报”**、**“法说会”**、**“业绩预告”**、**“月度营收”**，或被**法说会到期提醒任务唤醒**时激活。自动定向抓取最新法说会纪要/Q&A，参考 [references/event_calendar.md](./references/event_calendar.md) 时间抓手与 [templates/event_monitoring.md](./templates/event_monitoring.md) 模版，输出包含【指引拆解+A股映射买点/避险结论】的法说会决策解读报告。
+   - **【按需激活：每日股市早报与法说会自动追踪计划】**：当触发 Cron 定时任务或用户输入 **`/morning-report`**、**“生成每日股市早报”** 时激活。
+     1. **强制 Tool Call 运行脚本**：必须首先通过 `run_command` 工具调用 `python3 scripts/fetch_overnight_data.py --market all` 获取美股(19家)+台股(18家)物理收盘价与成交量 `volume`；
+     2. **识别法说会预告自动注册计划**：识别隔夜美/台标的法说会/业绩会预告日期，**自动调用系统 `schedule` 工具**为你注册后置跟踪提醒任务（格式如 `schedule <Date> 跟踪[公司名称]法说会最新纪要`）；
+     3. **输出每日早报**：结合单股精细检索补充归因，按照 [morning_report.md](./templates/morning_report.md) 格式输出今日每日股市早报。
    - **【主动澄清】**：如果问题过于宽泛或模糊，主动提出1-2个针对性的澄清问题。
 
 2. **严谨的关联推演与双语排版**
