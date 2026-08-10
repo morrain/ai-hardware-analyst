@@ -30,7 +30,6 @@ def load_tickers_from_json(json_path="tickers.json"):
     Loads tickers from the Single Source of Truth tickers.json file.
     """
     if not os.path.exists(json_path):
-        # Fallback if script is run from a subfolder
         script_dir = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.join(os.path.dirname(script_dir), json_path)
     
@@ -42,7 +41,7 @@ def load_tickers_from_json(json_path="tickers.json"):
         print(f"[Error] Failed to load tickers registry from {json_path}: {e}", file=sys.stderr)
         return {}
 
-def fetch_ticker_quote(symbol, full_symbol, name, market, sector):
+def fetch_ticker_quote(symbol, full_symbol, name, name_cn, market, sector, sector_cn):
     """
     Simulated fetch for overnight stock quote data.
     Can be extended with yfinance, Alpha Vantage, or custom API endpoints.
@@ -52,8 +51,10 @@ def fetch_ticker_quote(symbol, full_symbol, name, market, sector):
         "symbol": symbol,
         "full_symbol": full_symbol,
         "name": name,
+        "name_cn": name_cn,
         "market": market,
         "sector": sector,
+        "sector_cn": sector_cn,
         "timestamp": timestamp,
         "source": "Yahoo Finance Helper",
         "status": "ready"
@@ -64,13 +65,13 @@ def main():
     print(f"[{datetime.datetime.now().isoformat()}] Fetching AI hardware market data (Market: {args.market})...")
     ticker_registry = load_tickers_from_json(args.registry)
     
-    us_data = [fetch_ticker_quote(t["symbol"], t.get("full_symbol", t["symbol"]), t["name"], "US", t.get("sector", "")) 
+    us_data = [fetch_ticker_quote(t["symbol"], t.get("full_symbol", t["symbol"]), t["name"], t.get("name_cn", t["name"]), "US", t.get("sector", ""), t.get("sector_cn", "")) 
                for t in ticker_registry.get("us", [])] if args.market in ["all", "us"] else []
     
-    tw_data = [fetch_ticker_quote(t["symbol"], t.get("full_symbol", t["symbol"]), t["name"], "TW", t.get("sector", "")) 
+    tw_data = [fetch_ticker_quote(t["symbol"], t.get("full_symbol", t["symbol"]), t["name"], t.get("name_cn", t["name"]), "TW", t.get("sector", ""), t.get("sector_cn", "")) 
                for t in ticker_registry.get("tw", [])] if args.market in ["all", "tw"] else []
     
-    cn_data = [fetch_ticker_quote(t["symbol"], t.get("full_symbol", t["symbol"]), t["name"], "CN", t.get("sector", "")) 
+    cn_data = [fetch_ticker_quote(t["symbol"], t.get("full_symbol", t["symbol"]), t["name"], t.get("name_cn", t["name"]), "CN", t.get("sector", ""), t.get("sector_cn", "")) 
                for t in ticker_registry.get("cn", [])] if args.market in ["all", "cn"] else []
     
     results = {
@@ -95,7 +96,7 @@ def main():
         json.dump(results, f, ensure_ascii=False, indent=2)
     
     print(f"Successfully processed {len(us_data)} US, {len(tw_data)} TW, and {len(cn_data)} CN tickers.")
-    print(f"Data summary saved to {args.output}")
+    print(f"Data summary with bilingual names saved to {args.output}")
 
 if __name__ == "__main__":
     main()
