@@ -71,6 +71,7 @@
 
 | 数据源类型 | 机构 / 平台名称 | 入口 Portal 范例 URL 链接 | 数据权威度与解析用途 |
 | :--- | :--- | :--- | :--- |
+| **A 股法定监管** | 巨潮资讯网 (Cninfo) | `http://www.cninfo.com.cn/`<br>[Cninfo 官方披露搜索](http://www.cninfo.com.cn/new/commonUrl?url=disclosure/list/notice) | 中国证监会指定 A 股唯一法定披露源，可用 `scripts/fetch_cn_announcements.py` 提取 PDF |
 | **美股物理行情 API** | 新浪财经美股网关 | `http://hq.sinajs.cn/list=gb_nvda,gb_tsm,gb_mu,gb_lite` | 毫秒级批量物理价格，用于早报表单零 null 填充 |
 | **美股大盘行情** | Yahoo Finance 专栏 | [Yahoo Finance NVDA](https://finance.yahoo.com/quote/NVDA)<br>[Yahoo Finance TSM](https://finance.yahoo.com/quote/TSM) | 官方个股收盘与盘后行情页面 |
 | **SEC 法定监管** | 美国证监会 EDGAR | [SEC EDGAR Company Search](https://www.sec.gov/edgar/searchedgar/companysearch)<br>[NVIDIA SEC 8-K Archive](https://www.sec.gov/edgar/browse/?CIK=1045810) | 法定 8-K / 10-Q 重大合同与业绩备案原始出处 |
