@@ -59,3 +59,17 @@
 ### 3.2 华尔街见闻 / 财联社 24h 快讯
 - **检索协议与语法**：`site:wallstreetcn.com [标的/芯片] 隔夜`
 - **核心抓手**：美联储官员表态、美商务部出口控制政策突发事件。
+
+---
+
+## 4. 全量数据源权威原始出处与直达链接对照表 (Authoritative Direct URLs)
+
+| 数据源类型 | 机构 / 平台名称 | 原始出处直达 URL 链接 | 数据权威度与解析用途 |
+| :--- | :--- | :--- | :--- |
+| **美股物理行情 API** | 新浪财经美股网关 | `http://hq.sinajs.cn/list=gb_nvda,gb_tsm,gb_mu,gb_lite` | 毫秒级批量物理价格，用于早报表单零 null 填充 |
+| **美股大盘行情** | Yahoo Finance 专栏 | [Yahoo Finance NVDA](https://finance.yahoo.com/quote/NVDA)<br>[Yahoo Finance TSM](https://finance.yahoo.com/quote/TSM) | 官方个股收盘与盘后行情页面 |
+| **SEC 法定监管** | 美国证监会 EDGAR | [SEC EDGAR Company Search](https://www.sec.gov/edgar/searchedgar/companysearch)<br>[NVIDIA SEC 8-K Archive](https://www.sec.gov/edgar/browse/?CIK=1045810) | 法定 8-K / 10-Q 重大合同与业绩备案原始出处 |
+| **深度买卖方研报** | Seeking Alpha 专栏 | [Seeking Alpha NVDA Analysis](https://seekingalpha.com/symbol/NVDA/analysis)<br>[Seeking Alpha NVDA Earnings](https://seekingalpha.com/symbol/NVDA/earnings) | 机构买卖方深度逻辑与 Q2/Q3 业绩指引观点拆解 |
+| **华尔街大行评级** | TipRanks / MarketWatch | [MarketWatch NVDA Analyst Estimates](https://www.marketwatch.com/investing/stock/nvda/analystestimates)<br>[TipRanks NVDA Forecast](https://www.tipranks.com/stocks/nvda/forecast) | 高盛、大摩、美银等大行目标价与评级一致性预期 |
+| **台湾官方高频营收** | 台湾公开资讯观测站 (MOPS) | [MOPS 官方首页](https://mops.twse.com.tw/)<br>[MOPS IFRS 营基月报](https://mops.twse.com.tw/mops/web/t05st10_ifrs) | 台股鸿海(2317)、广达(2382)、健策(3653)月度合并营收官方原抓手 |
+
