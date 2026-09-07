@@ -27,7 +27,7 @@ def parse_args():
     parser.add_argument("--market", choices=["all", "us", "tw"], default="all",
                         help="Filter by specific market (default: all)")
     parser.add_argument("--output", default="overnight_summary.json",
-                        help="Output JSON filename (default: overnight_summary.json)")
+                        help="Output JSON filename (use '-' for stdout)")
     parser.add_argument("--registry", default="tickers.json",
                         help="Path to tickers.json registry file")
     return parser.parse_args()
@@ -89,30 +89,34 @@ def fetch_us_quotes_sina_batch(us_tickers):
     }
 
     quotes_map = {}
-    try:
-        req = urllib.request.Request(api_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=8) as response:
-            if response.status == 200:
-                text = response.read().decode('gbk', errors='ignore')
-                for line in text.strip().split('\n'):
-                    if '=' in line and '"' in line:
-                        sym_raw = line.split('=')[0].replace('var hq_str_gb_', '').upper()
-                        fields = line.split('=')[1].strip(' ";\n\r').split(',')
-                        if len(fields) >= 27:
-                            cp = float(fields[1]) if fields[1] else None
-                            ch_pct = float(fields[2]) if fields[2] else None
-                            vol = float(fields[10]) if fields[10] else None
-                            pp = float(fields[26]) if fields[26] else None
-                            
-                            quotes_map[sym_raw] = {
-                                "close_price": round(cp, 2) if cp else None,
-                                "prev_close": round(pp, 2) if pp else None,
-                                "pct_change_pct": round(ch_pct, 2) if ch_pct is not None else None,
-                                "volume_raw": vol,
-                                "volume_str": format_volume_str(vol, "US")
-                            }
-    except Exception as e:
-        print(f"[Warning] Sina US Batch fetch error: {e}", file=sys.stderr)
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(api_url, headers=headers)
+            with urllib.request.urlopen(req, timeout=8) as response:
+                if response.status == 200:
+                    text = response.read().decode('gbk', errors='ignore')
+                    for line in text.strip().split('\n'):
+                        if '=' in line and '"' in line:
+                            sym_raw = line.split('=')[0].replace('var hq_str_gb_', '').upper()
+                            fields = line.split('=')[1].strip(' ";\n\r').split(',')
+                            if len(fields) >= 27:
+                                cp = float(fields[1]) if fields[1] else None
+                                ch_pct = float(fields[2]) if fields[2] else None
+                                vol = float(fields[10]) if fields[10] else None
+                                pp = float(fields[26]) if fields[26] else None
+                                
+                                quotes_map[sym_raw] = {
+                                    "close_price": round(cp, 2) if cp else None,
+                                    "prev_close": round(pp, 2) if pp else None,
+                                    "pct_change_pct": round(ch_pct, 2) if ch_pct is not None else None,
+                                    "volume_raw": vol,
+                                    "volume_str": format_volume_str(vol, "US")
+                                }
+                    break
+        except Exception as e:
+            if attempt == 2:
+                print(f"[Warning] Sina US Batch fetch error: {e}", file=sys.stderr)
+            time.sleep(1)
 
     formatted = []
     for t in us_tickers:
@@ -145,9 +149,11 @@ def fetch_us_quotes_sina_batch(us_tickers):
 
 def fetch_single_tw_quote(t):
     """
-    Fetches single TW stock quote trying .TW then .TWO suffixes.
+    Fetches single TW stock quote using the exact full_symbol from tickers.json.
+    Includes simple retry mechanism.
     """
     sym = t["symbol"]
+    full_sym = t.get("full_symbol", f"{sym}.TW")
     timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
 
@@ -155,14 +161,9 @@ def fetch_single_tw_quote(t):
     vol_str = "N/A"
     status = "api_fetch_failed"
 
-    suffixes = [".TW", ".TWO"]
-    # Check if listed in OTC (.TWO)
-    otc_symbols = ["6223", "6510", "6515", "3324", "3017", "6805", "5274", "6274"]
-    if sym in otc_symbols:
-        suffixes = [".TWO", ".TW"]
-
-    for suf in suffixes:
-        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}{suf}?interval=1d"
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{full_sym}?interval=1d"
+    
+    for attempt in range(3):
         try:
             req = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(req, timeout=5) as response:
@@ -182,11 +183,13 @@ def fetch_single_tw_quote(t):
                             status = "exact_physical_quote"
                             break
         except Exception:
+            if attempt < 2:
+                time.sleep(1)
             pass
 
     return {
         "symbol": sym,
-        "full_symbol": t.get("full_symbol", f"{sym}.TW"),
+        "full_symbol": full_sym,
         "name": t["name"],
         "name_cn": t.get("name_cn", t["name"]),
         "market": "TW",
@@ -204,7 +207,7 @@ def fetch_single_tw_quote(t):
 
 def main():
     args = parse_args()
-    print(f"[{datetime.datetime.now().isoformat()}] Fetching daily market quotes & volume (Market: {args.market})...")
+    print(f"[{datetime.datetime.now().isoformat()}] Fetching daily market quotes & volume (Market: {args.market})...", file=sys.stderr)
     ticker_registry = load_tickers_from_json(args.registry)
     
     us_tickers = ticker_registry.get("us", []) if args.market in ["all", "us"] else []
@@ -241,11 +244,13 @@ def main():
         }
     }
     
-    with open(args.output, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
-    
-    print(f"Successfully processed {len(us_quotes)} US quotes ({us_exact}/{len(us_quotes)} exact) and {len(tw_quotes)} TW quotes ({tw_exact}/{len(tw_quotes)} exact).")
-    print(f"Data summary saved to {args.output}")
+    if args.output == "-":
+        print(json.dumps(results, ensure_ascii=False, indent=2))
+    else:
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        print(f"Successfully processed {len(us_quotes)} US quotes ({us_exact}/{len(us_quotes)} exact) and {len(tw_quotes)} TW quotes ({tw_exact}/{len(tw_quotes)} exact).", file=sys.stderr)
+        print(f"Data summary saved to {args.output}", file=sys.stderr)
 
 if __name__ == "__main__":
     main()

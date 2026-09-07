@@ -16,7 +16,7 @@ description: >-
 
 1. **强执行防幻觉防过期**：凡涉及股价、市值、估值（PE/PB）、财务数据、公司 AI 主营业务占比、台股月度营收，**必须强制触发网络检索工具或行情 Python 脚本**查询最新公开数据。
 2. **数据硬门禁 (Hard Verification Gate - 物理价格零误报规则)**：
-   - 当生成早报（或行情表格）时，**必须首先调用 `run_command` 工具运行 `python3 scripts/fetch_overnight_data.py --market all`** 提取真实物理行情。
+   - 当生成早报（或行情表格）时，**必须首先调用 `run_command` 工具运行 `python3 scripts/fetch_overnight_data.py --market all --output -`** 提取真实物理行情（直接输出到终端，避免产生临时文件）。
    - 若通过搜索引擎补搜价格，**严禁将超过 3 只股票混在一句话里泛搜**（必须遵循 [data_sources.md](./references/data_sources.md) 单股精细语法）。
    - **阻断门禁**：如果在检索到的文本中未获得确切的收盘数值与百分比，必须对该标的执行单股二次补搜；若仍无显式命中，表格中该项填为 `[待物理行情API刷新]`，**严禁凭猜测或估算填充任何假设数字**！
 3. **标的中文名称括号排版铁律**：在撰写任何分析报告、早报、对比表格或文字回答提及标的时，**强制必须同时在括号中给出中文名称**（格式为 `中文名 (英文名/代码)` 或 `英文名 (中文名, 代码)`），例如：`英伟达 (NVIDIA, NVDA.US)`、`台积电 (TSMC, TSM.US)`、`甲骨文 (Oracle, ORCL.US)`、`美光科技 (Micron, MU.US)`、`Lumentum (LITE.US)`、`SK海力士 (SK Hynix)`、`胜宏科技 (300476.SZ)`、`麦格米特 (002851.SZ)`。
@@ -75,8 +75,8 @@ description: >-
    - **【按需激活：重大事件与财报/法说会解读决策】**：当用户要求分析特定标的最新 **“公告”**、**“财报”**、**“法说会”**、**“业绩预告”**、**“月度营收”**，或被**法说会到期提醒任务唤醒**时激活。自动定向抓取最新法说会纪要/Q&A，参考 [references/event_calendar.md](./references/event_calendar.md) 时间抓手与 [templates/event_monitoring.md](./templates/event_monitoring.md) 模版，输出包含【指引拆解+A股映射买点/避险结论】的法说会决策解读报告。
    - **【按需激活：每日股市早报与重要事件提醒】**：当触发 Cron 定时任务或用户输入 **`/morning-report`**、**“生成每日股市早报”** 时激活。
      1. **强制 Tool Call 运行脚本**：必须首先通过 `run_command` 工具调用：
-        - `python3 scripts/fetch_overnight_data.py --market all` 获取美股(19家)+台股(18家)物理收盘价与成交量 `volume`；
-        - `python3 scripts/fetch_cn_announcements.py --batch --days 2` 获取 [tickers.json](./tickers.json) 中 17 家 A 股关注标的近 24 小时内的最新法定公告；
+        - `python3 scripts/fetch_overnight_data.py --market all --output -` 获取美股(19家)+台股(18家)物理收盘价与成交量 `volume`；
+        - `python3 scripts/fetch_cn_announcements.py --batch --days 2 --output -` 获取 [tickers.json](./tickers.json) 中 17 家 A 股关注标的近 24 小时内的最新法定公告；
      2. **识别法说会预告并给出重要事件提醒**：识别隔夜美/台标的法说会/业绩会预告日期，汇总列出重要事件与关键时间节点提醒；
      3. **高信息密度与定价线索影响分析规程**：
         - 第一部分行情快照优先强突出【🔥 隔夜美台核心异动/放量标的】；

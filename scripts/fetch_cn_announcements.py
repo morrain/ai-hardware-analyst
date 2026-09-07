@@ -18,17 +18,19 @@ import argparse
 import sys
 import urllib.request
 import urllib.parse
+import time
+import random
 from concurrent.futures import ThreadPoolExecutor
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Fetch official A-share company announcements from Cninfo.")
     parser.add_argument("--stock", default="", help="Stock code (e.g. 300476, 300308, 002851)")
     parser.add_argument("--keyword", default="", help="Announcement search keyword (e.g. 业绩预告, 半年报, 合同)")
-    parser.add_argument("--pageSize", type=int, default=5, help="Number of announcements to fetch (default: 5)")
+    parser.add_argument("--pageSize", type=int, default=30, help="Number of announcements to fetch (default: 30)")
     parser.add_argument("--days", type=int, default=2, help="Filter announcements published within N days (default: 2)")
     parser.add_argument("--batch", action="store_true", help="Batch query all CN tickers defined in tickers.json")
     parser.add_argument("--registry", default="tickers.json", help="Path to tickers.json registry")
-    parser.add_argument("--output", default="cn_announcements.json", help="Output JSON filename")
+    parser.add_argument("--output", default="cn_announcements.json", help="Output JSON filename (use '-' for stdout)")
     return parser.parse_args()
 
 def load_cn_tickers_from_json(json_path="tickers.json"):
@@ -43,7 +45,7 @@ def load_cn_tickers_from_json(json_path="tickers.json"):
         print(f"[Error] Failed to load CN tickers from {json_path}: {e}", file=sys.stderr)
         return []
 
-def fetch_cninfo_announcements(stock_code="", keyword="", page_size=5, days_filter=None):
+def fetch_cninfo_announcements(stock_code="", keyword="", page_size=30, days_filter=None):
     url = "http://www.cninfo.com.cn/new/hisAnnouncement/query"
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -77,49 +79,54 @@ def fetch_cninfo_announcements(stock_code="", keyword="", page_size=5, days_filt
     announcements_list = []
     now_dt = datetime.datetime.now()
 
-    try:
-        with urllib.request.urlopen(req, timeout=8) as response:
-            if response.status == 200:
-                raw_text = response.read().decode("utf-8", errors="ignore")
-                json_res = json.loads(raw_text)
-                anns = json_res.get("announcements") or []
-                
-                for a in anns:
-                    sec_code = a.get("secCode")
-                    sec_name = a.get("secName")
-                    raw_title = a.get("announcementTitle") or ""
-                    clean_title = raw_title.replace("<em>", "").replace("</em>", "").strip()
-                    adj_path = a.get("adjunctUrl")
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=15) as response:
+                if response.status == 200:
+                    raw_text = response.read().decode("utf-8", errors="ignore")
+                    json_res = json.loads(raw_text)
+                    anns = json_res.get("announcements") or []
                     
-                    # Strict stock code check: if stock_code is provided, drop non-matching announcements
-                    if stock_code and sec_code and str(sec_code).strip() != str(stock_code).strip():
-                        continue
-
-                    pdf_url = f"http://static.cninfo.com.cn/{adj_path}" if adj_path else ""
-                    time_stamp = a.get("announcementTime")
-                    pub_date = ""
-                    pub_dt = None
-                    if time_stamp:
-                        pub_dt = datetime.datetime.fromtimestamp(time_stamp / 1000.0)
-                        pub_date = pub_dt.strftime("%Y-%m-%d")
-
-                    # Check days filter if specified
-                    if days_filter is not None and pub_dt is not None:
-                        delta_days = (now_dt.date() - pub_dt.date()).days
-                        if delta_days > days_filter:
+                    for a in anns:
+                        sec_code = a.get("secCode")
+                        sec_name = a.get("secName")
+                        raw_title = a.get("announcementTitle") or ""
+                        clean_title = raw_title.replace("<em>", "").replace("</em>", "").strip()
+                        adj_path = a.get("adjunctUrl")
+                        
+                        # Strict stock code check: if stock_code is provided, drop non-matching announcements
+                        if stock_code and sec_code and str(sec_code).strip() != str(stock_code).strip():
                             continue
 
-                    announcements_list.append({
-                        "stock_code": sec_code,
-                        "stock_name": sec_name,
-                        "title": clean_title,
-                        "pub_date": pub_date,
-                        "announcement_id": a.get("announcementId"),
-                        "pdf_url": pdf_url,
-                        "source": "Cninfo Official Disclosure Portal (cninfo.com.cn)"
-                    })
-    except Exception as e:
-        print(f"[Warning] Failed to fetch Cninfo for stock '{stock_code}': {e}", file=sys.stderr)
+                        pdf_url = f"http://static.cninfo.com.cn/{adj_path}" if adj_path else ""
+                        time_stamp = a.get("announcementTime")
+                        pub_date = ""
+                        pub_dt = None
+                        if time_stamp:
+                            pub_dt = datetime.datetime.fromtimestamp(time_stamp / 1000.0)
+                            pub_date = pub_dt.strftime("%Y-%m-%d")
+
+                        # Check days filter if specified
+                        if days_filter is not None and pub_dt is not None:
+                            delta_days = (now_dt.date() - pub_dt.date()).days
+                            if delta_days > days_filter:
+                                continue
+
+                        announcements_list.append({
+                            "stock_code": sec_code,
+                            "stock_name": sec_name,
+                            "title": clean_title,
+                            "pub_date": pub_date,
+                            "announcement_id": a.get("announcementId"),
+                            "pdf_url": pdf_url,
+                            "source": "Cninfo Official Disclosure Portal (cninfo.com.cn)"
+                        })
+            break
+        except Exception as e:
+            if attempt == 2:
+                print(f"[Warning] Failed to fetch Cninfo for stock '{stock_code}': {e}", file=sys.stderr)
+            else:
+                time.sleep(2)
 
     return announcements_list
 
@@ -129,18 +136,20 @@ def main():
 
     if args.batch:
         cn_tickers = load_cn_tickers_from_json(args.registry)
-        print(f"[{datetime.datetime.now().isoformat()}] Batch querying Cninfo for {len(cn_tickers)} CN tickers (Days filter <= {args.days}d)...")
+        print(f"[{datetime.datetime.now().isoformat()}] Batch querying Cninfo for {len(cn_tickers)} CN tickers (Days filter <= {args.days}d)...", file=sys.stderr)
         
         def fetch_single(ticker_info):
+            # Jitter to avoid triggering anti-scraping protection on bulk queries
+            time.sleep(random.uniform(0.5, 1.5))
             code = ticker_info["symbol"]
-            return fetch_cninfo_announcements(stock_code=code, keyword="", page_size=5, days_filter=args.days)
+            return fetch_cninfo_announcements(stock_code=code, keyword="", page_size=30, days_filter=args.days)
 
         with ThreadPoolExecutor(max_workers=8) as executor:
             batch_results = list(executor.map(fetch_single, cn_tickers))
             for res in batch_results:
                 results_list.extend(res)
     else:
-        print(f"[{datetime.datetime.now().isoformat()}] Querying Cninfo for stock='{args.stock}', keyword='{args.keyword}'...")
+        print(f"[{datetime.datetime.now().isoformat()}] Querying Cninfo for stock='{args.stock}', keyword='{args.keyword}'...", file=sys.stderr)
         results_list = fetch_cninfo_announcements(args.stock, args.keyword, args.pageSize, days_filter=args.days if args.stock else None)
 
     output_data = {
@@ -152,11 +161,13 @@ def main():
         "announcements": results_list
     }
 
-    with open(args.output, "w", encoding="utf-8") as f:
-        json.dump(output_data, f, ensure_ascii=False, indent=2)
-
-    print(f"Successfully fetched {len(results_list)} official announcements from Cninfo.")
-    print(f"Results saved to {args.output}")
+    if args.output == "-":
+        print(json.dumps(output_data, ensure_ascii=False, indent=2))
+    else:
+        with open(args.output, "w", encoding="utf-8") as f:
+            json.dump(output_data, f, ensure_ascii=False, indent=2)
+        print(f"Successfully fetched {len(results_list)} official announcements from Cninfo.", file=sys.stderr)
+        print(f"Results saved to {args.output}", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
