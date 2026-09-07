@@ -14,7 +14,7 @@ description: >-
 
 在每次回答前**确认当前真实世界日期**。实时检索并分析全球AI产业链的最新公开市场动态（新闻、财报、公司公告、进出口数据、台股月度营收、A股研报与公告等），精准、高效地解答用户关于AI产业链的任何疑问。
 
-1. **强执行防幻觉防过期**：凡涉及股价、市值、估值（PE/PB）、财务数据、公司 AI 主营业务占比、台股月度营收，**必须强制触发网络检索工具或行情 Python 脚本**查询最新公开数据。
+1. **强执行防幻觉防过期**：凡涉及股价、市值、估值（PE/PB）、财务数据、公司 AI 主营业务占比、台股月度营收，**必须强制触发网络检索工具或行情 Python 脚本**查询最新公开数据（注：查询台股月度营收时，每月1-10日强制用 `search_web` 查早鸟新闻，11日以后才允许使用 `fetch_tw_mops_revenue.py` 脚本）。
 2. **数据硬门禁 (Hard Verification Gate - 物理价格零误报规则)**：
    - 当生成早报（或行情表格）时，**必须首先调用 `run_command` 工具运行 `python3 scripts/fetch_overnight_data.py --market all --output -`** 提取真实物理行情（直接输出到终端，避免产生临时文件）。
    - 若通过搜索引擎补搜价格，**严禁将超过 3 只股票混在一句话里泛搜**（必须遵循 [data_sources.md](./references/data_sources.md) 单股精细语法）。
@@ -72,7 +72,13 @@ description: >-
    - **【短问短答】**：若用户询问具体数据（例：“广达上个月营收是多少？”），必须直接、简明扼要地给出数字和时间。参考 [quick_answer.md](./templates/quick_answer.md)。
    - **【通用深度报告】**：在用户要求“梳理逻辑”、“写分析报告”时激活，参考 [deep_report.md](./templates/deep_report.md) 之【分支一】。
    - **【按需激活：A股时间错配传导分析】**：当提问中包含 **“映射”**、**“A股时间错配”**、**“传导机会”**、**“A股买点/弹性”** 时激活，格式参考 [deep_report.md](./templates/deep_report.md) 之【分支二】。
-   - **【按需激活：重大事件与财报/法说会解读决策】**：当用户要求分析特定标的最新 **“公告”**、**“财报”**、**“法说会”**、**“业绩预告”**、**“月度营收”**，或被**法说会到期提醒任务唤醒**时激活。自动定向抓取最新法说会纪要/Q&A，参考 [references/event_calendar.md](./references/event_calendar.md) 时间抓手与 [templates/event_monitoring.md](./templates/event_monitoring.md) 模版，输出包含【指引拆解+A股映射买点/避险结论】的法说会决策解读报告。
+   - **【按需激活：重大事件与财报/法说会解读决策】**：当用户要求分析特定标的最新 **“公告”**、**“财报”**、**“法说会”** 或 **“业绩预告”**，或被**法说会到期提醒任务唤醒**时激活。自动定向抓取最新法说会纪要/Q&A，参考 [references/event_calendar.md](./references/event_calendar.md) 时间抓手与 [templates/event_monitoring.md](./templates/event_monitoring.md) 模版，输出包含【指引拆解+A股映射买点/避险结论】的法说会决策解读报告。
+   - **【按需激活：台股营收与产业链趋势推演】**：当用户输入快捷口令 **`/tw-revenue`**、**“生成台股营收报告”** 或 **“分析台企月度营收”** 时激活。
+      1. **双擎智能抓取数据 (Smart Fetching)**：
+         - **1-10 日 (早鸟期)**：如果当前日期在 1 号至 10 号之间，**严禁使用脚本**。强制调用 `search_web` 工具，定点查阅核心公司（如台积电、广达、信骅等）最新的当月营收新闻（包含历史趋势）。
+         - **11 日及以后 (全量期)**：如果当前日期在 11 号及以后，必须调用 `run_command` 运行 `python3 scripts/fetch_tw_mops_revenue.py --output -` 拉取全量精准数据。
+      2. **历史趋势追踪与知识库推演**：无论使用哪种抓取方式，都必须基于过去 3~6 个月的历史月度营收曲线，并结合 [value_chain_topology.md](./references/value_chain_topology.md) 识别产业链景气度爆发点与拥堵点。
+      3. **输出报告**：按照 [tw_revenue_report.md](./templates/tw_revenue_report.md) 范式输出全景深度报告，**不再局限于具体 A 股代码映射**，而是直接指出当前真正具备业绩爆发潜力的**高弹性板块与赛道**。
    - **【按需激活：每日股市早报与重要事件提醒】**：当触发 Cron 定时任务或用户输入 **`/morning-report`**、**“生成每日股市早报”** 时激活。
      1. **强制 Tool Call 运行脚本**：必须首先通过 `run_command` 工具调用：
         - `python3 scripts/fetch_overnight_data.py --market all --output -` 获取美股(19家)+台股(18家)物理收盘价与成交量 `volume`；
