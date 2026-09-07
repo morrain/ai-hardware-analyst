@@ -6,9 +6,9 @@ to fetch official announcements, PDF download links, and release timestamps for 
 
 Supports single stock lookup or batch lookup for CN tickers defined in tickers.json.
 
-Usage:
-    python3 scripts/fetch_cn_announcements.py --stock 300476 --keyword 业绩预告
-    python3 scripts/fetch_cn_announcements.py --batch --days 2 --output cn_today_announcements.json
+Examples:
+    python3 scripts/fetch_cn_announcements.py --stock 300476 --keyword 业绩预告 --output -
+    python3 scripts/fetch_cn_announcements.py --batch --days 2 --output -
 """
 
 import os

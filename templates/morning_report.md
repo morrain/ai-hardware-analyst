@@ -5,8 +5,8 @@
 > 📌 **排版与逻辑规程**：
 > 1. 所有涉及的标的在文章段落与表格中，必须同时带上中文名称（例如 `英伟达 (NVIDIA, NVDA.US)`、`台积电 (TSMC, 2330.TW)`、`广达 (Quanta, 2382.TW)`、`胜宏科技 (300476.SZ)`）。
 > 2. 生成早报前，**必须首先调用 `run_command` 工具运行**：
->    - `python3 scripts/fetch_overnight_data.py --market all` 提取美/台物理收盘价与成交量；
->    - `python3 scripts/fetch_cn_announcements.py --batch --days 2` 检索 A 股关注标的最新公告。
+>    - `python3 scripts/fetch_overnight_data.py --market all --output -` 提取美/台物理收盘价与成交量；
+>    - `python3 scripts/fetch_cn_announcements.py --batch --days 2 --output -` 检索 A 股关注标的最新公告。
 > 3. **信息密度与视线聚焦规程**：
 >    - **第一部分行情快照**：优先强突出 **【🔥 隔夜美台核心异动/放量标的】**（涨跌幅较大、放量或有重磅催化的标的）；对于微幅震荡 (如 ±0.5% 以内) 且无催化的标的合并在一行收叠展示，大幅提升开盘决策效率。
 >    - **第二部分新闻与 A 股公告**：表达精炼，去无用废话。**但对能影响资产定价/估值/开盘方向的关键信息与线索，强制必须给出确切的影响分析（格式：`[事实要点] ➔ [定价/估值影响分析]`）**。若 A 股关注标的当日无新公告则隐去 A 股公告小节。

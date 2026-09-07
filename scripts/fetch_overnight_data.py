@@ -9,7 +9,7 @@ High-Performance Hybrid Engine:
 - TW Tickers: Yahoo v8 Chart API with automatic .TW / .TWO market suffix matching
 
 Usage:
-    python3 scripts/fetch_overnight_data.py --market all
+    python3 scripts/fetch_overnight_data.py --market all --output -
     python3 scripts/fetch_overnight_data.py --output overnight_summary.json
 """
 
